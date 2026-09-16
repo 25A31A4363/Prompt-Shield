@@ -188,3 +188,54 @@ class ComparisonResponse(BaseModel):
     unresolved_count: int
     regression_count: int
     attack_diffs: List[ComparisonAttackDiff]
+
+# --- Prompt Analysis & Security Triage Schemas ---
+class PromptAnalyzeRequest(BaseModel):
+    prompt: str = Field(..., min_length=1, max_length=10000)
+
+class PromptAnalyzeResponse(BaseModel):
+    risk_status: str       # NO_APPARENT_RISK, LOW_REVIEW, MEDIUM_RISK, HIGH_RISK
+    severity: str          # CRITICAL, HIGH, MEDIUM, LOW, NONE
+    risk_category: str     # Direct Prompt Injection, System Prompt Extraction, etc.
+    confidence: float
+    explanation: str
+    indicators_detected: List[str] = []
+    recommendation: str
+    potential_impact: str
+    investigation_steps: str
+
+class FindingCreateRequest(BaseModel):
+    prompt: str
+    risk_status: str
+    risk_category: str
+    severity: str
+    confidence: float = 0.0
+    explanation: str
+    indicators_detected: List[str] = []
+    recommendation: str
+    potential_impact: Optional[str] = None
+    investigation_steps: Optional[str] = None
+
+class FindingStatusUpdateRequest(BaseModel):
+    status: str = Field(..., pattern="^(NEW|UNDER REVIEW|CONFIRMED|FIXED|RESOLVED)$")
+    review_notes: Optional[str] = None
+
+class FindingResponse(BaseModel):
+    id: str
+    prompt: str
+    risk_status: str
+    risk_category: str
+    severity: str
+    confidence: float
+    explanation: str
+    indicators_detected: List[str]
+    recommendation: str
+    potential_impact: Optional[str]
+    investigation_steps: Optional[str]
+    status: str
+    review_notes: Optional[str]
+    created_at: datetime
+    updated_at: Optional[datetime]
+
+    model_config = ConfigDict(from_attributes=True)
+

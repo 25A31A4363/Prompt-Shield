@@ -161,3 +161,39 @@ export interface ComparisonResponse {
   regression_count: number;
   attack_diffs: ComparisonAttackDiff[];
 }
+
+// --- Prompt Security Triage & Findings Types ---
+export type RiskStatus = 'NO_APPARENT_RISK' | 'LOW_REVIEW' | 'MEDIUM_RISK' | 'HIGH_RISK';
+export type FindingSeverity = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'NONE';
+export type FindingStatus = 'NEW' | 'UNDER REVIEW' | 'CONFIRMED' | 'FIXED' | 'RESOLVED';
+
+export interface PromptAnalysisResult {
+  risk_status: RiskStatus;
+  severity: FindingSeverity;
+  risk_category: string;
+  confidence: number;
+  explanation: string;
+  indicators_detected: string[];
+  recommendation: string;
+  potential_impact: string;
+  investigation_steps: string;
+}
+
+export interface SecurityFinding {
+  id: string;
+  prompt: string;
+  risk_status: RiskStatus;
+  risk_category: string;
+  severity: FindingSeverity;
+  confidence: number;
+  explanation: string;
+  indicators_detected: string[];
+  recommendation: string;
+  potential_impact?: string;
+  investigation_steps?: string;
+  status: FindingStatus;
+  review_notes?: string;
+  created_at: string;
+  updated_at?: string;
+}
+

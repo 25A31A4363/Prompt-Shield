@@ -10,7 +10,8 @@ from app.api import (
     routes_scans,
     routes_reports,
     routes_comparison,
-    routes_battery
+    routes_battery,
+    routes_findings
 )
 
 @asynccontextmanager
@@ -52,6 +53,7 @@ app.include_router(routes_scans.router, prefix=settings.API_V1_STR)
 app.include_router(routes_reports.router, prefix=settings.API_V1_STR)
 app.include_router(routes_comparison.router, prefix=settings.API_V1_STR)
 app.include_router(routes_battery.router, prefix=settings.API_V1_STR)
+app.include_router(routes_findings.router, prefix=settings.API_V1_STR)
 
 if __name__ == "__main__":
     import uvicorn

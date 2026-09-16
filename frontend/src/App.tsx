@@ -8,6 +8,7 @@ import { NewScan } from './pages/NewScan';
 import { LiveScan } from './pages/LiveScan';
 import { ScanResults } from './pages/ScanResults';
 import { VulnerabilityDetails } from './pages/VulnerabilityDetails';
+import { SecurityFindings } from './pages/SecurityFindings';
 import { Reports } from './pages/Reports';
 import { ScanComparison } from './pages/ScanComparison';
 import { Settings } from './pages/Settings';
@@ -55,6 +56,9 @@ export function App() {
           )}
           {currentView === 'vulns' && (
             <VulnerabilityDetails scanId={activeScanId} onNavigate={handleNavigate} />
+          )}
+          {currentView === 'findings' && (
+            <SecurityFindings onNavigate={handleNavigate} />
           )}
           {currentView === 'reports' && (
             <Reports scanId={activeScanId} onNavigate={handleNavigate} />

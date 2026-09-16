@@ -96,3 +96,24 @@ class ScanComparison(Base):
     unresolved_attack_ids = Column(JSON, default=list)
     regressed_attack_ids = Column(JSON, default=list)
     created_at = Column(DateTime, default=utc_now)
+
+
+class SecurityFinding(Base):
+    __tablename__ = "security_findings"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    prompt = Column(Text, nullable=False)
+    risk_status = Column(String(30), nullable=False)      # NO_APPARENT_RISK, LOW_REVIEW, MEDIUM_RISK, HIGH_RISK
+    risk_category = Column(String(100), nullable=False)   # Direct Prompt Injection, System Prompt Extraction, etc.
+    severity = Column(String(20), nullable=False)         # CRITICAL, HIGH, MEDIUM, LOW, NONE
+    confidence = Column(Float, default=0.0)
+    explanation = Column(Text, nullable=False)
+    indicators_detected = Column(JSON, default=list)
+    recommendation = Column(Text, nullable=False)
+    potential_impact = Column(Text, nullable=True)
+    investigation_steps = Column(Text, nullable=True)
+    status = Column(String(30), default="NEW")             # NEW, UNDER REVIEW, CONFIRMED, FIXED, RESOLVED
+    review_notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
+

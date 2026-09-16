@@ -4,8 +4,9 @@ import {
   FileText, Activity, AlertTriangle, CheckCircle2, Server
 } from 'lucide-react';
 import { SecurityGauge } from '../components/SecurityGauge';
+import { PromptScannerBox } from '../components/PromptScannerBox';
 import { api } from '../services/api';
-import { ScanRun } from '../types';
+import { ScanRun, SecurityFinding } from '../types';
 
 interface DashboardProps {
   onNavigate: (view: string, scanId?: string) => void;
@@ -13,6 +14,7 @@ interface DashboardProps {
 
 export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const [recentScans, setRecentScans] = useState<ScanRun[]>([]);
+  const [recentFindings, setRecentFindings] = useState<SecurityFinding[]>([]);
   const [loading, setLoading] = useState(true);
   const [launchingDemo, setLaunchingDemo] = useState(false);
 
@@ -23,10 +25,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      const history = await api.getScanHistory();
+      const [history, findingsData] = await Promise.all([
+        api.getScanHistory(),
+        api.getFindings()
+      ]);
       setRecentScans(history);
+      setRecentFindings(findingsData);
     } catch (err) {
-      console.error('Failed to load dashboard history', err);
+      console.error('Failed to load dashboard data', err);
     } finally {
       setLoading(false);
     }
@@ -91,6 +97,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           </div>
         </div>
       </div>
+
+      {/* Prominent Prompt Security Triage & Risk Analyzer Area */}
+      <PromptScannerBox
+        onNavigateToFindings={() => onNavigate('findings')}
+        onFindingCreated={(newFinding) => {
+          setRecentFindings((prev) => [newFinding, ...prev.filter(f => f.id !== newFinding.id)]);
+        }}
+      />
 
       {/* Overview Cards & Gauge */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -305,6 +319,95 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                         className="text-cyan-400 hover:text-cyan-300 font-bold text-xs cursor-pointer hover:underline"
                       >
                         Inspect &rarr;
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Security Team Triage Queue */}
+      <div className="bg-[#0e1628] border border-slate-800 rounded-xl p-6 shadow-lg">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-base font-bold text-slate-100 flex items-center space-x-2">
+              <ShieldAlert className="w-4 h-4 text-cyan-400" />
+              <span>Security Team Triage Queue</span>
+            </h2>
+            <p className="text-xs text-slate-400 font-mono">
+              Live queue of prompt security findings submitted for investigation and remediation
+            </p>
+          </div>
+          <button
+            onClick={() => onNavigate('findings')}
+            className="flex items-center space-x-1.5 text-xs font-mono text-cyan-400 hover:text-cyan-300 cursor-pointer"
+          >
+            <span>Open Full Findings Hub &rarr;</span>
+          </button>
+        </div>
+
+        {recentFindings.length === 0 ? (
+          <div className="text-center py-8 text-slate-500 font-mono text-xs">
+            No security findings logged yet. Use the prompt scanner above to analyze and dispatch risks to the security team.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left font-mono text-xs">
+              <thead className="border-b border-slate-800 text-slate-400 uppercase text-[11px]">
+                <tr>
+                  <th className="py-2.5 px-3">Finding ID</th>
+                  <th className="py-2.5 px-3">Category</th>
+                  <th className="py-2.5 px-3">Severity</th>
+                  <th className="py-2.5 px-3">Prompt Preview</th>
+                  <th className="py-2.5 px-3">Logged Date</th>
+                  <th className="py-2.5 px-3">Status</th>
+                  <th className="py-2.5 px-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60 text-slate-300">
+                {recentFindings.slice(0, 5).map((finding) => (
+                  <tr key={finding.id} className="hover:bg-slate-900/40 transition">
+                    <td className="py-3 px-3 font-bold text-cyan-400">
+                      #{finding.id.slice(0, 8)}
+                    </td>
+                    <td className="py-3 px-3 font-semibold text-slate-200">
+                      {finding.risk_category}
+                    </td>
+                    <td className="py-3 px-3">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                        finding.severity === 'CRITICAL' ? 'bg-purple-950 text-purple-300 border border-purple-800' :
+                        finding.severity === 'HIGH' ? 'bg-rose-950 text-rose-300 border border-rose-800' :
+                        finding.severity === 'MEDIUM' ? 'bg-amber-950 text-amber-300 border border-amber-800' :
+                        'bg-slate-800 text-slate-300 border border-slate-700'
+                      }`}>
+                        {finding.severity}
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 max-w-xs truncate text-slate-400" title={finding.prompt}>
+                      "{finding.prompt}"
+                    </td>
+                    <td className="py-3 px-3 text-slate-500 text-[11px]">
+                      {new Date(finding.created_at).toLocaleString()}
+                    </td>
+                    <td className="py-3 px-3">
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        finding.status === 'NEW' ? 'bg-cyan-950 text-cyan-300 border border-cyan-800' :
+                        finding.status === 'UNDER REVIEW' ? 'bg-amber-950 text-amber-300 border border-amber-800' :
+                        finding.status === 'CONFIRMED' ? 'bg-rose-950 text-rose-300 border border-rose-800' :
+                        'bg-emerald-950 text-emerald-300 border border-emerald-800'
+                      }`}>
+                        {finding.status}
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 text-right">
+                      <button
+                        onClick={() => onNavigate('findings')}
+                        className="text-cyan-400 hover:text-cyan-300 font-bold text-xs cursor-pointer hover:underline"
+                      >
+                        Triage &rarr;
                       </button>
                     </td>
                   </tr>

@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   LayoutDashboard, Server, BookOpen, PlayCircle, Terminal,
-  BarChart3, AlertTriangle, FileText, GitCompare, Settings
+  BarChart3, AlertTriangle, FileText, GitCompare, Settings, ShieldAlert
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -19,6 +19,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, onNavigate, hasAc
     { id: 'live-scan', label: 'Live Telemetry', icon: Terminal, pulse: hasActiveScan },
     { id: 'results', label: 'Scan Results', icon: BarChart3 },
     { id: 'vulns', label: 'Vulnerability Details', icon: AlertTriangle },
+    { id: 'findings', label: 'Security Findings', icon: ShieldAlert },
     { id: 'reports', label: 'Security Reports', icon: FileText },
     { id: 'comparison', label: 'Scan Comparison', icon: GitCompare },
     { id: 'settings', label: 'Settings', icon: Settings },
@@ -59,7 +60,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, onNavigate, hasAc
         <div className="px-2">
           <p className="text-[11px] font-mono uppercase tracking-wider text-slate-500 font-semibold mb-2">Analysis & Audit</p>
           <nav className="space-y-1">
-            {menuItems.slice(5, 9).map((item) => {
+            {menuItems.slice(5, 10).map((item) => {
               const Icon = item.icon;
               const isActive = currentView === item.id;
               return (
@@ -83,7 +84,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, onNavigate, hasAc
         <div className="px-2">
           <p className="text-[11px] font-mono uppercase tracking-wider text-slate-500 font-semibold mb-2">Configuration</p>
           <nav className="space-y-1">
-            {menuItems.slice(9).map((item) => {
+            {menuItems.slice(10).map((item) => {
               const Icon = item.icon;
               const isActive = currentView === item.id;
               return (
